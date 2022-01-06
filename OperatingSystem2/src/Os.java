@@ -6,11 +6,13 @@
 
 /**
  *
- * @author Judah-Steve
+ * @author Judah-Steve 
  */
 public class Os {
+    //My email is judah.jroyz@gmail.com
     MMU mmu;
     MainMemory mainMemory;
+    
     public static void main(String args){
         
     }

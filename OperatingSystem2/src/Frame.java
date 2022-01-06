@@ -6,7 +6,7 @@
 
 /**
  *
- * @author Judah-Steve
+ * @author Judah-Steve 
  */
 public class Frame {
     int frameNo;
