@@ -7,9 +7,7 @@ import java.util.Map;
  * and open the template in the editor.
  */
 
-/**
- * @author Judah-Steve
- */
+
 public class PageTable {
     Process process;
     Map<Short, Short> map;

@@ -4,11 +4,15 @@
  * and open the template in the editor.
  */
 
-/**
- * @author Judah-Steve
- */
+
 public class Frame {
     short frameNo;
+    Page page;
+
+    public Frame(short frameNo, Page page) {
+        this.frameNo = frameNo;
+        this.page = page;
+    }
 
     public short getFrameNo() {
         return frameNo;
@@ -23,13 +27,6 @@ public class Frame {
     }
 
     public void setPage(Page page) {
-        this.page = page;
-    }
-
-    Page page;
-
-    public Frame(short frameNo, Page page) {
-        this.frameNo = frameNo;
         this.page = page;
     }
 }

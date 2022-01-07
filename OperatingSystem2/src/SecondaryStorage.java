@@ -7,9 +7,7 @@ import java.util.List;
  * and open the template in the editor.
  */
 
-/**
- * @author Judah-Steve
- */
+
 public class SecondaryStorage {
     public List<Page> getPages() {
         return pages;

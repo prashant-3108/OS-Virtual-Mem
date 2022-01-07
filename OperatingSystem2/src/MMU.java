@@ -9,9 +9,7 @@ import java.util.logging.Logger;
  * and open the template in the editor.
  */
 
-/**
- * @author Judah-Steve
- */
+
 public class MMU extends Thread {
     final List<Process> que = new ArrayList<>();
     final List<Process> blockedQue = new ArrayList<>();

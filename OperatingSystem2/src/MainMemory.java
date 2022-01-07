@@ -9,9 +9,7 @@ import java.util.Map;
  * and open the template in the editor.
  */
 
-/**
- * @author Judah-Steve
- */
+
 public class MainMemory {
 
     Os os;
