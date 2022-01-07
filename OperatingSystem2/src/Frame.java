@@ -6,12 +6,12 @@
 
 /**
  *
- * @author Judah-Steve 
+ * @author Judah-Steve
  */
 public class Frame {
-    int frameNo;
+    short frameNo;
     Page page;
-    public Frame(int frameNo, Page page){
+    public Frame(short frameNo, Page page){
         this.frameNo = frameNo;
         this.page = page;
         
