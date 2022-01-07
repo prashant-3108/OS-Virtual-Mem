@@ -16,6 +16,7 @@ public class MainMemory {
     int totalFrameSize;
     Frame[] frames;
     List<PageTable> pageTables = new ArrayList<>();
+    Map<Process,List<Frame>> frameUsageByProcess = new HashMap<>();
 
 
     public MainMemory(Os os, int totalFrameSize) {
@@ -27,7 +28,7 @@ public class MainMemory {
         }
     }
 
-
+    /**
     boolean pageExistInMemory(Page page) {
         synchronized (os.mmu) {
             for (PageTable pageTable : pageTables) {
@@ -38,10 +39,23 @@ public class MainMemory {
             return false;
         }
     }
+    */
+    
+      boolean pageExistInMemory(Page page) {
+        synchronized (os.mmu) {
+            for (Frame frame: frames) {
+                if (frame.page == page) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
 
     void loadProcess(Process process) {
         synchronized (os.mmu) {
+            process.blocked = false;
             if (!pageTables.contains(process.pageTable)) {
                 pageTables.add(process.pageTable);
             }
@@ -60,7 +74,14 @@ public class MainMemory {
                         //System.out.println("==="+process+"__"+process.pageLocation+"=== ("+os.mmu.minimumFramesPerProcess+")");
                         os.secondaryStorage.pages.remove(page);
                         os.mmu.cycles += 300;
+                        process.inMemory = true;
                         allocatedFrames++;
+                        if(frameUsageByProcess.get(process) == null){
+                            frameUsageByProcess.put(process, new ArrayList<>());
+                        }else{
+                            frameUsageByProcess.get(process).add(frame);
+                        }
+                        os.writeToOutput(process);
                     }
                 }
                 if (allocatedFrames == os.mmu.minimumFramesPerProcess) {
@@ -74,7 +95,7 @@ public class MainMemory {
             }
 
 
-            System.out.println(process + " --" + process.pageLocation + "  " + process.pageSize);
+            //System.out.println(process + " --" + process.pageLocation + "  " + process.pageSize);
             if (process.pageLocation < process.pageSize) {
                 for (int i = process.pageLocation; i < process.pageSize; i++) {
                     //System.out.println(i);1
@@ -103,22 +124,26 @@ public class MainMemory {
 
 
     int getReadyQue() {
-        Map<Short, Frame> map = new HashMap<>();
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i].page != null) {
-                map.put(frames[i].page.processId, frames[i]);
+        synchronized(os.mmu){
+            Map<Short, Frame> map = new HashMap<>();
+            for (int i = 0; i < frames.length; i++) {
+                if (frames[i].page != null) {
+                    map.put(frames[i].page.processId, frames[i]);
+                }
             }
+            return map.keySet().size();
         }
-        return map.keySet().size();
     }
 
     int availableFrames() {
-        int availableFrames = 0;
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i].page == null) {
-                availableFrames++;
+        synchronized(os.mmu){
+            int availableFrames = 0;
+            for (int i = 0; i < frames.length; i++) {
+                if (frames[i].page == null) {
+                    availableFrames++;
+                }
             }
+            return availableFrames;
         }
-        return availableFrames;
     }
 }

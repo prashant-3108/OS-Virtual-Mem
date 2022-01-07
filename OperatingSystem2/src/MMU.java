@@ -1,5 +1,8 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +22,7 @@ public class MMU extends Thread {
     int minimumFramesPerProcess;
     int cycles;
     int timeQuanta = 10;
+    int pageFaults = 0;
     Process[] processes;
     int pageReplacementType;
 
@@ -30,7 +34,9 @@ public class MMU extends Thread {
     void switchContext(Process currentProcess) {
         synchronized (this) {
             currentProcess.onQue = true;
-            currentProcess.releaseMemory();
+            if(!currentProcess.blocked){
+                currentProcess.releaseMemory();
+            }
             Process nextProcess = null;
             if (!que.isEmpty()) {
                 nextProcess = que.remove(0);
@@ -50,6 +56,8 @@ public class MMU extends Thread {
         synchronized (this) {
             que.remove(process);
             blockedQue.add(process);
+            process.faults++;
+            process.blocked = true;
             process.onQue = true;
         }
     }
@@ -90,11 +98,30 @@ public class MMU extends Thread {
 
 
     Process LRU() {
-        return null;
+        synchronized(this){
+            Process leastUsedProcess = null;
+            Map<Integer,Process> mapBySize = new HashMap<>();
+            List<Integer> sizeList = new ArrayList<>();
+            for(Process process : os.mainMemory.frameUsageByProcess.keySet()){
+                int processUsage = os.mainMemory.frameUsageByProcess.get(process).size();
+                mapBySize.put(processUsage, process);
+                sizeList.add(processUsage);
+            }
+            Collections.sort(sizeList);  
+            for(int usageSize : sizeList){
+                leastUsedProcess = mapBySize.get(usageSize);
+                if(leastUsedProcess.inMemory){
+                    //System.out.println("}}}}}}}}}}Least used process "+leastUsedProcess);
+                    return leastUsedProcess;
+                }
+            }
+            
+            return leastUsedProcess; 
+        }
     }
 
 
-    void sheduleProcesses() {
+    void sheduleProcesses(){
         for (Process process : processes) {
             //process = new Process(this);
             process.start();

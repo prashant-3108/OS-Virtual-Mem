@@ -27,7 +27,7 @@ public class Os {
         secondaryStorage = new SecondaryStorage();
         try {
             fileWriter = new FileWriter("output.txt");
-            fileWriter.write("cycles;jobque;readyque;processOnThread;availableFrames\n");
+            fileWriter.write("cycles;jobque;readyque;processOnThread;availableFrames;pageFaults\n");
         } catch (IOException ex) {
             Logger.getLogger(Os.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -44,7 +44,7 @@ public class Os {
     }
 
     void writeToOutput(Process process) {
-        String output = mmu.cycles + ";" + mmu.getJobQue() + ";" + mainMemory.getReadyQue() + ";" + process.id + ";" + mainMemory.availableFrames();
+        String output = mmu.cycles + ";" + mmu.getJobQue() + ";" + mainMemory.getReadyQue() + ";" + process.id + ";" + mainMemory.availableFrames()+";"+process.faults;
         synchronized (this) {
             try {
                 fileWriter.write(output + "\n");
@@ -66,6 +66,7 @@ public class Os {
         FileReader reader = null;
         BufferedReader buf = null;
         try {
+            System.out.println("Reading Config file");
             reader = new FileReader("config.txt");
             char[] buffer = new char[1024];
             buf = new BufferedReader(reader);
@@ -86,8 +87,8 @@ public class Os {
                 } else if (counter > 2) {
                     String[] pDetails = line.split("\\s+");
                     int pageSize = Integer.parseInt(pDetails[3].trim());
-                    Process process = new Process(mmu, pageSize);
-                    process.id = Short.parseShort(pDetails[0].trim());
+                    short pid = Short.parseShort(pDetails[0].trim());
+                    Process process = new Process(mmu,pid, pageSize); 
                     process.start = Integer.parseInt(pDetails[1].trim());
                     process.duration = Short.parseShort(pDetails[2].trim());
                     processes[processCounter] = process;
@@ -112,10 +113,12 @@ public class Os {
 
 
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Os.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Config file not found");
         } catch (IOException ex) {
             Logger.getLogger(Os.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        }catch (Exception ex) {
+            System.out.println("Invalid config file provided");
+        }  finally {
             try {
                 reader.close();
             } catch (IOException ex) {

@@ -19,6 +19,7 @@ public class Process extends Thread {
     int timeUsed;
     short pageLocation;
     int allocatedFrames;
+    int traceLocation;
     List<Page> pages;
     List<Integer> traces;
     List<Integer> completedTraces;
@@ -26,38 +27,51 @@ public class Process extends Thread {
     MMU mmu;
     boolean completed = false;
     boolean onQue = false;
+    boolean inMemory = false;
+    boolean blocked = false;
+    int faults = 0;
+    
 
-    public Process(MMU mmu, int pageSize) {
+    public Process(MMU mmu,short id, int pageSize) {
         pages = new ArrayList<>();
         traces = new ArrayList<>();
         pageTable = new PageTable(this);
         completedTraces = new ArrayList<>();
         this.pageSize = pageSize;
-
+        this.id = id;
+        traceLocation = 0;
         for (short i = 0; i < pageSize; i++) {
             pages.add(new Page(id, i));
         }
         this.mmu = mmu;
+        this.setName("Process "+id); 
 
 
+    }
+    
+    @Override
+    public String toString(){
+        return getName();
     }
 
     void releaseMemory() {
         for (Frame frame : pageTable.objectMap.values()) {
             frame.page = null;
         }
-
+        inMemory = false;
     }
 
     @Override
     public void run() {
         mmu.os.mainMemory.loadProcess(this);
         while (!completed) {
-            for (int i = 0; i < traces.size(); i++) {
+            
+            for (int i = traceLocation; i < traces.size(); i++) {
                 int trace = traces.get(i);
                 short pageNo = (short) (trace >> 4);
 
                 mmu.cycles++;
+                traceLocation++;
                 if (pageNo < pages.size()) {
                     Page page = pages.get(pageNo);
                     if (mmu.os.mainMemory.pageExistInMemory(page)) {
@@ -70,17 +84,21 @@ public class Process extends Thread {
                 }
 
             }
-            mmu.switchContext(this);
+             
+            //
+            mmu.switchContext(this); 
+            mmu.os.writeToOutput(this); 
             synchronized (mmu) {
                 int counter = 0;
                 while (onQue) {
                     try {
                         System.out.println(this + "Waiting");
                         mmu.wait(duration);
-                        if (mmu.que.size() == 1 && mmu.que.contains(this)) {
+                        if(mmu.finishedProcess.size() +1 == mmu.processes.length){
                             onQue = false;
                             mmu.os.mainMemory.loadProcess(this);
                         }
+                         
                         counter++;
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Process.class.getName()).log(Level.SEVERE, null, ex);
@@ -94,6 +112,7 @@ public class Process extends Thread {
             this.mmu.finishedProcess.add(this);
             this.mmu.que.remove(this);
             System.out.println(this + "finished");
+            this.releaseMemory();
             mmu.os.writeToOutput(this);
         }
     }
