@@ -92,7 +92,8 @@ public class Process extends Thread {
                 int counter = 0;
                 while (onQue) {
                     try {
-                        System.out.println(this + "Waiting");
+                        System.out.println(this + " waiting");
+                        mmu.os.writeToConsoleFile(this + " waiting"); 
                         mmu.wait(duration);
                         if(mmu.finishedProcess.size() +1 == mmu.processes.length){
                             onQue = false;
@@ -105,13 +106,15 @@ public class Process extends Thread {
                     }
                 }
             }
-            System.out.println(this + "resumed");
+            System.out.println(this + " resumed");
+            mmu.os.writeToConsoleFile(this + " resumed"); 
             //System.out.println("page location : "+pageLocation+" : page size "+pageSize);
         }
         synchronized (this.mmu) {
             this.mmu.finishedProcess.add(this);
             this.mmu.que.remove(this);
-            System.out.println(this + "finished");
+            System.out.println(this + " finished");
+             mmu.os.writeToConsoleFile(this + " finished"); 
             this.releaseMemory();
             mmu.os.writeToOutput(this);
         }

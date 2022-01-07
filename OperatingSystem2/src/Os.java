@@ -20,6 +20,7 @@ public class Os {
     int minimumFrameSize;
     Process[] processes;
     FileWriter fileWriter;
+    FileWriter fileWriter2;
 
 
     public Os() {
@@ -27,6 +28,7 @@ public class Os {
         secondaryStorage = new SecondaryStorage();
         try {
             fileWriter = new FileWriter("output.txt");
+            fileWriter2 = new FileWriter("detailed-scheduling.txt");
             fileWriter.write("cycles;jobque;readyque;processOnThread;availableFrames;pageFaults\n");
         } catch (IOException ex) {
             Logger.getLogger(Os.class.getName()).log(Level.SEVERE, null, ex);
@@ -39,6 +41,7 @@ public class Os {
         System.out.println(os.processes.length);
         for (Process process : os.processes) {
             System.out.println(process + "-" + process.mmu);
+            os.writeToConsoleFile(process + "-" + process.mmu); 
         }
         os.mmu.start();
     }
@@ -53,10 +56,22 @@ public class Os {
             }
         }
     }
+    
+     void writeToConsoleFile(String output) {
+        synchronized (this) {
+            try {
+                fileWriter2.write(output + "\n");
+            } catch (IOException ex) {
+                Logger.getLogger(Os.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
+    
     void freeAllResource() {
         try {
             fileWriter.close();
+            fileWriter2.close();
         } catch (IOException ex) {
             Logger.getLogger(Os.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -67,6 +82,7 @@ public class Os {
         BufferedReader buf = null;
         try {
             System.out.println("Reading Config file");
+            writeToConsoleFile("Reading Config file"); 
             reader = new FileReader("config.txt");
             char[] buffer = new char[1024];
             buf = new BufferedReader(reader);
@@ -75,6 +91,7 @@ public class Os {
             int processCounter = 0;
             while ((line = buf.readLine()) != null) {
                 System.out.println(line);
+                writeToConsoleFile(line); 
                 if (counter == 0) {
                     numberOfProcesses = Integer.parseInt(line.trim());
                     processes = new Process[numberOfProcesses];

@@ -144,8 +144,11 @@ public class MMU extends Thread {
 
             }
         }
-        os.freeAllResource();
+        os.writeToConsoleFile("All process execution completed");
         System.out.println("All process execution completed");
+        os.freeAllResource();
+       
+        
 
     }
 }

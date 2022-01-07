@@ -89,6 +89,7 @@ public class MainMemory {
                     process.onQue = false;
                     process.allocatedFrames = 0;
                     System.out.println("Frames allocated for " + process);
+                    os.writeToConsoleFile("Frames allocated for " + process); 
                     break;
                 }
 
