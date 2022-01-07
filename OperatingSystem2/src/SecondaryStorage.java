@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,12 +8,16 @@ import java.util.List;
  */
 
 /**
- *
  * @author Judah-Steve
  */
 public class SecondaryStorage {
-    
+    public List<Page> getPages() {
+        return pages;
+    }
+
+    public void setPages(List<Page> pages) {
+        this.pages = pages;
+    }
+
     List<Page> pages = new ArrayList<>();
-    
-    
 }

@@ -1,4 +1,3 @@
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,18 +8,16 @@ import java.util.Map;
  */
 
 /**
- *
  * @author Judah-Steve
  */
 public class PageTable {
     Process process;
-    Map<Short,Short> map;
-    Map<Page,Frame> objectMap;
-    
-    public PageTable(Process process){
+    Map<Short, Short> map;
+    Map<Page, Frame> objectMap;
+
+    public PageTable(Process process) {
         this.process = process;
         map = new HashMap<>();
         objectMap = new HashMap<>();
     }
-    
 }
